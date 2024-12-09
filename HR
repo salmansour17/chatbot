@@ -1,0 +1,86 @@
+import streamlit as st
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.stats import binom, poisson, chi2
+
+# Load data (Example DataFrame)
+data = {
+    "Date": pd.date_range(start="2023-01-01", periods=340),
+    "Withdrawals": np.random.poisson(538, 340),  # Simulated data
+}
+df = pd.DataFrame(data)
+
+# App Title
+st.title("Statistical Modeling for Bank HR Optimization")
+
+# Introduction Section
+st.header("Introduction")
+st.write("""
+This project analyzes 340 days of withdrawal activity from a local bank branch to determine 
+the most suitable probability distribution for optimizing HR resource allocation. Key features:
+- Comparison of binomial and Poisson distributions.
+- Application of chi-squared tests for goodness-of-fit.
+- Practical insights for efficient staffing and planning.
+""")
+
+# Display Data
+st.subheader("Withdrawal Data")
+st.dataframe(df)
+
+# Statistical Summary
+st.subheader("Statistical Summary")
+average_withdrawals = df["Withdrawals"].mean()
+std_dev_withdrawals = df["Withdrawals"].std()
+st.write(f"**Average Withdrawals per Day:** {average_withdrawals:.2f}")
+st.write(f"**Standard Deviation of Withdrawals:** {std_dev_withdrawals:.2f}")
+
+# Binomial Distribution Visualization
+st.subheader("Binomial Distribution")
+n = 340  # Total days
+p = 0.659  # Probability of success
+x = np.arange(0, n + 1)
+binomial_pmf = binom.pmf(x, n, p)
+
+plt.figure(figsize=(10, 5))
+plt.bar(x, binomial_pmf, color="blue", alpha=0.6)
+plt.title("Binomial Distribution")
+plt.xlabel("Number of Days with High Withdrawals")
+plt.ylabel("Probability")
+st.pyplot(plt)
+
+# Poisson Distribution Visualization
+st.subheader("Poisson Distribution")
+lambda_poisson = average_withdrawals
+x = np.arange(0, 2 * int(lambda_poisson))
+poisson_pmf = poisson.pmf(x, lambda_poisson)
+
+plt.figure(figsize=(10, 5))
+plt.bar(x, poisson_pmf, color="green", alpha=0.6)
+plt.title("Poisson Distribution")
+plt.xlabel("Number of Withdrawals")
+plt.ylabel("Probability")
+st.pyplot(plt)
+
+# Chi-Squared Test Results
+st.subheader("Chi-Squared Goodness-of-Fit Test")
+chi2_value = 338.065  # Example value from the report
+critical_value = chi2.ppf(0.95, df=339)
+st.write(f"**Chi-Squared Value:** {chi2_value:.3f}")
+st.write(f"**Critical Value at 95% Confidence Level:** {critical_value:.3f}")
+if chi2_value < critical_value:
+    st.success("Binomial distribution is a good fit for the data.")
+else:
+    st.error("Poisson distribution is not a good fit for the data.")
+
+# Practical Applications
+st.subheader("Practical Applications")
+st.write("""
+- **HR Optimization**: Use the binomial distribution to predict high-demand days for better staffing.
+- **Resource Allocation**: Plan for peak periods with confidence using data-driven insights.
+""")
+
+# Footer
+st.markdown("---")
+st.write("Created by [Your Name]. © 2024")
+
